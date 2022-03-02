@@ -8,7 +8,7 @@ import (
 	"github.com/goapt/dotenv"
 	"github.com/urfave/cli"
 
-	"github.com/fifsky/drone-wechat-work/wechat"
+	"github.com/fusiongalaxy/drone-wechat-work/wechat"
 )
 
 func main() {
@@ -38,10 +38,16 @@ func main() {
 			EnvVar: "PLUGIN_MSGTYPE",
 		},
 		cli.StringFlag{
-			Name:   "touser",
-			Usage:  "The users to send the message to, @all for all users",
+			Name:   "mentioned",
+			Usage:  "Comma separated `userid`s to be mentioned, use \"@all\" for all users",
 			Value:  "@all",
-			EnvVar: "PLUGIN_TOUSER",
+			EnvVar: "PLUGIN_MENTIONED_LIST",
+		},
+		cli.StringFlag{
+			Name:   "mentioned.mobile",
+			Usage:  "Comma separated mobile phone numbers to be mentioned, use \"@all\" for all users",
+			Value:  "@all",
+			EnvVar: "PLUGIN_MENTIONED_MOBILE_LIST",
 		},
 		cli.StringFlag{
 			Name:   "content",
@@ -153,10 +159,11 @@ func run(c *cli.Context) error {
 			Started: c.Int64("build.started"),
 			Created: c.Int64("build.created"),
 		},
-		Url:     c.String("url"),
-		MsgType: c.String("msgtype"),
-		ToUser:  c.String("touser"),
-		Content: c.String("content"),
+		Url:                 c.String("url"),
+		MsgType:             c.String("msgtype"),
+		MentionedList:       c.String("mentioned"),
+		MentionedMobileList: c.String("mentioned.mobile"),
+		Content:             c.String("content"),
 	}
 
 	err := robot.Send()

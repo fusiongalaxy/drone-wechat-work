@@ -1,13 +1,12 @@
 # drone-wechat-work
 
-wechat work robot plugin for drone
+Wechat Work robot plugin for Drone
 
 ### Usage
 
 ```yaml
   - name: notify
-    image: fifsky/drone-wechat-work
-    pull: always
+    image: fusiongalaxy/drone-wechat-work
     settings:
       url: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=XXX-XXXX-XXX-XXXXX
       msgtype: markdown
@@ -39,4 +38,5 @@ wechat work robot plugin for drone
 | url | string | Yes | none | The full address of webhook: https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=xxxxxx |
 | type | string | No | text | message type，support (text,markdown) |
 | content | string | Yes | none |  Message content, text or markdown or json string |
-| touser | string | No | none | At user,Use commas to separate, for example: 13812345678,13898754321 or all |
+| mentioned_list | string | No | none | Comma separated `userid`s to be mentioned, for example: "ponyma,jackma" or "@all" for all users |
+| mentioned_mobile_list | string | No | none | Comma separated mobile phone numbers to be mentioned, for example: "13812345678,13898754321" or "@all" for all users |

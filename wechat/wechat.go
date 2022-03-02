@@ -47,11 +47,12 @@ type (
 	}
 
 	WeChat struct {
-		Build   Build
-		Url     string
-		MsgType string
-		ToUser  string
-		Content string
+		Build               Build
+		Url                 string
+		MsgType             string
+		MentionedList       string
+		MentionedMobileList string
+		Content             string
 	}
 )
 
@@ -66,7 +67,7 @@ func jsonEncode(d interface{}) (*bytes.Buffer, error) {
 	return buf, nil
 }
 
-func (c *WeChat) MarkdownMessage(md string, at ...string) error {
+func (c *WeChat) MarkdownMessage(md string, mentionedList, mentionedMobileList []string) error {
 	we := &MarkdownRequest{
 		Msgtype: "markdown",
 		Markdown: map[string]interface{}{
@@ -74,8 +75,11 @@ func (c *WeChat) MarkdownMessage(md string, at ...string) error {
 		},
 	}
 
-	if len(at) > 0 {
-		we.Markdown["mentioned_mobile_list"] = at
+	if len(mentionedList) > 0 {
+		we.Markdown["mentioned_list"] = mentionedList
+	}
+	if len(mentionedMobileList) > 0 {
+		we.Markdown["mentioned_mobile_list"] = mentionedMobileList
 	}
 
 	buf, err := jsonEncode(we)
@@ -123,7 +127,7 @@ func (c *WeChat) call(buf *bytes.Buffer) error {
 	return nil
 }
 
-func (c *WeChat) Message(content string, at ...string) error {
+func (c *WeChat) Message(content string, mentionedList, mentionedMobileList []string) error {
 	we := &Request{
 		Msgtype: "text",
 		Text: map[string]interface{}{
@@ -131,8 +135,11 @@ func (c *WeChat) Message(content string, at ...string) error {
 		},
 	}
 
-	if len(at) > 0 {
-		we.Text["mentioned_mobile_list"] = at
+	if len(mentionedList) > 0 {
+		we.Text["mentioned_list"] = mentionedList
+	}
+	if len(mentionedMobileList) > 0 {
+		we.Text["mentioned_mobile_list"] = mentionedMobileList
 	}
 
 	buf, err := jsonEncode(we)
@@ -160,9 +167,12 @@ func (c *WeChat) postJson(url string, body *bytes.Buffer) (*http.Response, error
 }
 
 func (c *WeChat) Send() error {
-	var at []string
-	if c.ToUser != "" {
-		at = strings.Split(c.ToUser, ",")
+	var mentionedList, mentionedMobileList []string
+	if c.MentionedList != "" {
+		mentionedList = strings.Split(c.MentionedList, ",")
+	}
+	if c.MentionedMobileList != "" {
+		mentionedMobileList = strings.Split(c.MentionedMobileList, ",")
 	}
 
 	tempBuf, err := c.Template(c.Content)
@@ -171,12 +181,12 @@ func (c *WeChat) Send() error {
 	}
 
 	if c.MsgType == "text" {
-		return c.Message(strings.TrimSpace(string(tempBuf)), at...)
+		return c.Message(strings.TrimSpace(string(tempBuf)), mentionedList, mentionedMobileList)
 	}
 
 	if c.MsgType == "markdown" {
-		return c.MarkdownMessage(strings.TrimSpace(string(tempBuf)), at...)
+		return c.MarkdownMessage(strings.TrimSpace(string(tempBuf)), mentionedList, mentionedMobileList)
 	}
 
-	return fmt.Errorf("no support msgtype %s", c.MsgType)
+	return fmt.Errorf("not supported msgtype %s", c.MsgType)
 }
